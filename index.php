@@ -1,124 +1,66 @@
-<?php
-    ob_start();
-    session_start();
+<?php 
+//$pass = password_hash('123456' ,PASSWORD_BCRYPT);
+// echo $pass;
+//echo password_verify('1234567', '$2y$10$hy/XcXUljDqto0twa7j16uJfTzzyE3ZkET93RnDV1.Ub/2uS6Fq/q');
 
 
-    require_once "models/pdo_library.php";
-    require_once "models/BaseModel.php";
-    require_once "models/ProductModel.php";
-    require_once "models/CategoryModel.php";
-    require_once "models/CustomerModel.php";
-    require_once "models/CommentModel.php";
-    require_once "models/CartModel.php";
-    require_once "models/OrderModel.php";
-    require_once "models/PostModel.php";
-    define('BASE_URL', 'index.php?url=');
-    define('URL_MOMO', 'http://localhost/DUAN1_BOOKSTORE/cam-on');
-    define('URL_ORDER', 'http://localhost/DUAN1_BOOKSTORE/don-hang');
+// die;
+session_start();
 
-    require_once "components/head.php";
-    require_once "components/header.php";
+// Require file Common
+require_once './commons/env.php'; // Khai báo biến môi trường
+require_once './commons/function.php'; // Hàm hỗ trợ
 
-
-    if(!isset($_GET['url'])) {
-        require_once "views/home.php";
-    }else {
-        switch ($_GET['url']) {
-            case 'trang-chu':
-                         
-                require_once "views/home.php";
-                break;
-            case 'cua-hang':
-                         
-                require_once "views/shop.php";
-                break;
-            case 'chitietsanpham':
-                
-                require_once "views/productdetail.php";
-                break;
-            case 'danh-muc-san-pham':
-                        
-                require_once "views/shop-by-category.php";
-                break;    
-            case 'lien-he':    
-                require_once "views/contact.php";
-                break;
-            case 'gio-hang':    
-                require_once "views/cart.php";
-                break;
-            case 'thanh-toan':    
-                require_once "views/checkout.php";
-                break;  
-            case 'thanh-toan-2':    
-                require_once "views/checkout-address.php";
-                break; 
-            case 'thanh-toan-momo':    
-                require_once "views/checkout/checkout_momo.php";
-                break;
-            case 'cam-on':    
-                require_once "views/thanks.php";
-                break; 
-            case 'don-hang':    
-                require_once "views/my-order.php";
-                break;       
-            case 'chi-tiet-don-hang':    
-                require_once "views/my-orderdetails.php";
-                break; 
-            // User
-            case 'dang-nhap':    
-                require_once "views/user/login.php";
-                break; 
-            case 'dang-ky':    
-                require_once "views/user/register.php";
-                break;  
-            case 'dang-xuat':    
-                unset($_SESSION['user']);
-                header("Location: index.php");
-                break;  
-            case 'thong-tin-tai-khoan':    
-                require_once "views/user/user-infor.php";
-                break;  
-            case 'ho-so':    
-                require_once "views/user/edit-profile.php";
-                break; 
-            case 'doi-mat-khau':    
-                require_once "views/user/change-password.php";
-                break;
-            case 'quen-mat-khau':    
-                require_once "views/user/forgot-password.php";
-                break;
-            case 'khoi-phuc-mat-khau':    
-                require_once "views/user/password-recovery.php";
-                break;
-
-            //Bài viết
-            case 'bai-viet':    
-                require_once "views/blog/blogs.php";
-                break;    
-            case 'chi-tiet-bai-viet':    
-                require_once "views/blog/blog-details.php";
-                break;    
-            case 'danh-muc-bai-viet':    
-                require_once "views/blog/blog-by-category.php";
-                break;
-            //Bài viết
-            case 'tim-kiem':    
-                require_once "views/search.php";
-                break;    
-
-            default:
-                require_once "views/not-page.php";
-                break;
-        }
-    }
-
-    require_once "components/minicart.php";
-
-    require_once "components/footer.php";
+// Require toàn bộ file Controllers
+require_once './controllers/HomeController.php';
+require_once './controllers/GioHangDonHangController.php';
+// require_once './controllers/SanPhamController.php';
+// require_once './controllers/TaiKhoanController.php';
+require_once './controllers/TaiKhoanController.php';
+// Require toàn bộ file Models
+require_once './models/SanPham.php';
+require_once 'models/TaiKhoan.php';
+require_once 'models/GioHang.php';
+require_once 'models/DonHang.php';
+// Route
+$act = $_GET['act'] ?? '/';
 
 
-    
-    ob_end_flush();
-?>
-<br>
+    match ($act) {
+        // route
+        '/' => (new HomeController())->home(),
+        'da-dat-hang' =>(new HomeController())->daDatHang(),
+        'search' => (new HomeController())->timKiem(),
+        'login' => (new HomeController()) -> formLogin(),
+        'check-login' =>(new HomeController())->postLogin(),
+        'lien-he' => (new HomeController()) -> lienHe(),
+        'chi-tiet-san-pham' =>(new HomeController())->chiTietSanPham(),
+        'san-pham-theo-danh-muc' =>(new HomeController())->sanPhamDanhMuc(),
+        'them-gio-hang' =>(new GioHangDonHangController())->addGioHang(),
+        'gio-hang' =>(new GioHangDonHangController())->gioHang(),
+        'thanh-toan' =>(new GioHangDonHangController())->thanhToan(),
+        'xu-ly-thanh-toan' =>(new GioHangDonHangController())->postThanhToan(),
+        'xoa-san-pham-gio-hang' =>(new GioHangDonHangController())->xoaSp(),
 
+        // Người dùng
+        'form-login' =>(new TaiKhoanController())->formLogin(),
+        'check-login' =>(new TaiKhoanController())->postLogin(),
+        
+            
+        'logout' =>(new TaiKhoanController())->logout(),
+
+
+        'form-dang-ky' =>(new TaiKhoanController())->formDangKy(),
+        'dang-ky' =>(new TaiKhoanController())->dangKy(),
+
+        'quan-ly-tai-khoan' =>(new TaiKhoanController())->suaTaiKhoan(),
+        'sua-thong-tin-ca-nhan' =>(new TaiKhoanController())->suaThongTinCaNhan(),
+        'sua-mat-khau' =>(new TaiKhoanController())->suaMatKhau(),
+        'sua-anh-tai-khoan' =>(new TaiKhoanController())->suaAnhTaiKhoan(),
+        'gui-binh-luan' =>(new HomeController())->guiBinhLuan(),
+        'quen-mat-khau' =>(new TaiKhoanController())->quenMatKhau(),
+        'lay-mat-khau' =>(new TaiKhoanController())->layMatKhau(),
+   
+        
+        
+};
